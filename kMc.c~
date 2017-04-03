@@ -314,7 +314,7 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3])
 	u1 = (1.0*((rand()%(RAND_MAX-1))+1))/(1.0*RAND_MAX);
 	test = Q*u1;
 	L = 0;
-	E = 15;
+	E = 16;
 	for (int j = 0; j< 17; j++)
 	  {
             if (L>E)

@@ -39,35 +39,6 @@ long double rotm1[3][3] = {{0.5, -0.866025403784439, 0.0},{0.866025403784439,0.5
 long double rotm2[3][3] = {{-0.5, -0.866025403784439, 0.0},{0.866025403784439,-0.5, 0.0},{0.0,0.0,1.0}};
 
 
-/* Calculate potential */
-long double get_pot(long double x[3],long double locs[N][3][IT],long double chg[IT],int it, int h, int y)
-{ 
-  /* define elementary charge (e), dielectric constant (er), and permittivity
-     of free space (e0) */
-  long double e = 1.60217662e-19;
-  long double er = sqrt(10.03*9.66);
-  long double e0 = 8.854187817e-12;
-  long double eps = 2.2204e-16;
-  long double pi = 3.14159265358979;
-  long double inv[IT];
-  long double pot = 0.0;
-  /* compute distances between particles and then the potential */
-  for(int i = 0; i<IT; i++)
-    {
-      if (i != h)
-	{
-	  inv[i] = sqrt(pow((x[0] - locs[y][0][i]),2)+pow((x[2] - locs[y][1][i]),2)+pow((x[3] - locs[y][2][i]),2))+eps;
-	}
-    }
-  for(int i = 0; i<IT-1; i++)
-    {
-      if (i != h)
-	{
-	  pot += e/4/pi/e0/er*chg[i]/inv[i];
-	}
-    }
-  return pot;
-}
 void mat_pow(long double mat0[3][3], long double mat2[3][3],int power)
 {
   long double mat1[3][3];
@@ -160,7 +131,7 @@ void mat_vec_mul(long double vec0[3],long double vec1[3], long double mat0[3][3]
 }
 
 /* Run simulation */
-void kMC(long double cell2[3][3], long double spos_Si[6][3])
+void BFS(long double cell2[3][3], long double spos_Si[6][3])
 { 
   /* transition rates */
   long double r1 = v*exp(-E_1_l/kb/T);
@@ -311,10 +282,10 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3])
             continue;
 	  }
 	Q = R[16];
-	u1 = (1.0*((rand()%(RAND_MAX-1))+1))/(1.0*RAND_MAX);
+	u1 = (1.0*rand())/(1.0*RAND_MAX);
 	test = Q*u1;
 	L = 0;
-	E = 15;
+	E = 16;
 	for (int j = 0; j< 17; j++)
 	  {
             if (L>E)
