@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 5
+#define N 2
 
 /* Barriers */
 long double E_1_l = 2.951646;
@@ -142,24 +142,9 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3],long double P[(int) 
   long double mf[3][3];
   long double vec1[3];
   long double vec2[3];
-  long double locs[3];
-  long double locs0[3];
-  long double R[17] = {0};
-  long double Q; 
   long double Q1,Q2;
-  long double u1;
-  long double test;
-  int L;
-  int E;
-  int m;
   /* Initialize the array to store positions (llocs), which level - hexagonal
   % or cubic we are on - (k) and charge state (chg) */ 
-  double tt = 0;
-  double t; 
-  int itt = IT;
-  int switcher = 0;
-  long double chg[IT] = {-1.0};
-  int k[IT] = {0};
   Q1 = 6*r1+3*r3+3*r4+4*r5;
   Q2 = 6*r2+3*r3+3*r4+4*r5;
   if (log(12.0*index+1.0)/log(12.0)>= N)
@@ -184,7 +169,7 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3],long double P[(int) 
 		}		 
 	      P[12*index+ij][4] = r1/Q1*P[index][4];
 	      P[12*index+ij][3] = 1/Q1+P[index][3];
-	      BFS(cell2,spos_Si,P[(int) pow(12,N)][5],12*index+ij,swtch);
+	      BFS(cell2,spos_Si,P,12*index+ij,swtch);
 	    }
 	  else if (ij < 10)
 	    {
@@ -201,7 +186,7 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3],long double P[(int) 
 		}		 
 	      P[12*index+ij][4] = r3/Q1*P[index][4];
 	      P[12*index+ij][3] = 1/Q1+P[index][3];
-	      BFS(cell2,spos_Si,P[(int) pow(12,N)][5],12*index+ij,(swtch+3)%4);
+	      BFS(cell2,spos_Si,P,12*index+ij,(swtch+3)%4);
 	    }
 	  else
 	    {
@@ -218,7 +203,7 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3],long double P[(int) 
 		}		 
 	      P[12*index+ij][4] = r4/Q1*P[index][4];
 	      P[12*index+ij][3] = 1/Q1+P[index][3];
-	      BFS(cell2,spos_Si,P[(int) pow(12,N)][5],12*index+ij,(swtch+1)%4);
+	      BFS(cell2,spos_Si,P,12*index+ij,(swtch+1)%4);
 	    }
 	}
     }
@@ -240,7 +225,7 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3],long double P[(int) 
 		}		 
 	      P[12*index+ij][4] = r2/Q2*P[index][4];
 	      P[12*index+ij][3] = 1/Q2+P[index][3];
-	      BFS(cell2,spos_Si,P[(int) pow(12,N)][5],12*index+ij,swtch);
+	      BFS(cell2,spos_Si,P,12*index+ij,swtch);
 	    }
 	  else if (ij < 10)
 	    {
@@ -257,7 +242,7 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3],long double P[(int) 
 		}		 
 	      P[12*index+ij][4] = r4/Q2*P[index][4];
 	      P[12*index+ij][3] = 1/Q2+P[index][3];
-	      BFS(cell2,spos_Si,P[(int) pow(12,N)][5],12*index+ij,(swtch+3)%4);
+	      BFS(cell2,spos_Si,P,12*index+ij,(swtch+3)%4);
 	    }
 	  else if (ij < 13)
 	    {
@@ -274,7 +259,7 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3],long double P[(int) 
 		}		 
 	      P[12*index+ij][4] = r3/Q2*P[index][4];
 	      P[12*index+ij][3] = 1/Q2+P[index][3];
-	      BFS(cell2,spos_Si,P[(int) pow(12,N)][5],12*index+ij,(swtch+1)%4);
+	      BFS(cell2,spos_Si,P,12*index+ij,(swtch+1)%4);
 	    }
 	}
     }
@@ -283,26 +268,29 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3],long double P[(int) 
  
 int main(int argc, char** argv)
 {
-  time_t t;
   long double P[(int) pow(12,N)][5];
-  long double P2[(int) pow(12,N)][5] = {0};    
-  int checker[(int) pow(12,N)] = {0};
+  long double P2[(int) pow(12,N)][5];    
+  int checker[(int) pow(12,N)];
   long double cell2[3][3] = {{nnd, 0*a, 0*a}, {-nnd/2,nnd/2*sqrt(3), 0*a}, {0*1.0, 0*1.0, 10.086*c*nnd/3.078*a/2.57218587467527*2.51866888630220}};
   /* Intializes random number generator */
-  srand((unsigned) time(&t));
   P[0][0] = 0.0;
   P[0][1] = 0.0;
   P[0][2] = 0.0;
   P[0][3] = 0.0;
   P[0][4] = 1.0;
-  BFS(cell2,spos_Si,P,1,0);
+  for (int i = 0; i< pow(12,N); i++)
+    {
+      checker[i] = 0;
+    }
+  printf("%Lf\n",P[0][4]);
+  BFS(cell2,spos_Si,P,0,0); 
   for (int i = 0; i < pow(12,N); i++)
     {
       P2[i][0] = P[i][0];
       P2[i][1] = P[i][1];
       P2[i][2] = P[i][2];
       P2[i][3] = P[i][3];
- 
+      
       for (int j = i; j < pow(12,N); j++)
 	{
 	  if (((checker[j] ==0 && P[j][0] == P[i][0]) && (P[j][1] == P[i][1] && P[j][2] == P[i][2])) && (P[j][3] == P[i][3]))
@@ -315,7 +303,8 @@ int main(int argc, char** argv)
     {
       if (P2[i][4]> 0.0)
 	{
-	  printf("%Lf %Lf %Lf %Lf %Lf\n",P2[i][0],P2[i][1],P2[i][2],P2[i][3],P2[i][4]);
+	  printf("%Lf %Lf %Lf %Lf %Lf\n",P2[i][0]*1e9,P2[i][1]*1e9,P2[i][2]*1e9,P2[i][3],P2[i][4]);
+	}
     }
   return 0;
 }
