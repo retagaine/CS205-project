@@ -5,8 +5,6 @@
 #include <stdlib.h>
 
 #define N 5
-#define IT 2
-#define ITER 10000000
 
 /* Barriers */
 long double E_1_l = 2.951646;
