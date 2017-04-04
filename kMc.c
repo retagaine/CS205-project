@@ -55,16 +55,16 @@ long double get_pot(long double x[3],long double locs[N][3][IT],long double chg[
   for(int i = 0; i<IT; i++)
     {
       if (i != h)
-	{
-	  inv[i] = sqrt(pow((x[0] - locs[y][0][i]),2)+pow((x[2] - locs[y][1][i]),2)+pow((x[3] - locs[y][2][i]),2))+eps;
-	}
+    {
+      inv[i] = sqrt(pow((x[0] - locs[y][0][i]),2)+pow((x[2] - locs[y][1][i]),2)+pow((x[3] - locs[y][2][i]),2))+eps;
+    }
     }
   for(int i = 0; i<IT-1; i++)
     {
       if (i != h)
-	{
-	  pot += e/4/pi/e0/er*chg[i]/inv[i];
-	}
+    {
+      pot += e/4/pi/e0/er*chg[i]/inv[i];
+    }
     }
   return pot;
 }
@@ -74,9 +74,9 @@ void mat_pow(long double mat0[3][3], long double mat2[3][3],int power)
   for (int i = 0; i<3;i++)
     {
       for (int j = 0; j<3; j++)
-	{
-	  mat1[i][j] = mat2[i][j];
-	}
+    {
+      mat1[i][j] = mat2[i][j];
+    }
     }
   if (power == 0)
     {
@@ -84,47 +84,47 @@ void mat_pow(long double mat0[3][3], long double mat2[3][3],int power)
     {
     for (int j = 0; j<3; j++)
       {
-	if (i ==j)
-	  {
-	mat0[i][j] = 1.0;
-	  }
-	else
-	  {
-	mat0[i][j] = 0.0;
-	  }
+    if (i ==j)
+      {
+    mat0[i][j] = 1.0;
+      }
+    else
+      {
+    mat0[i][j] = 0.0;
+      }
       }
     }
     }
   else if (power == 1)
     {
       for (int i = 0; i< 3; i++)
-	{
-	  for (int j = 0; j<3; j++)
-	    {
-	      mat0[i][j] = mat2[i][j];
-	    }
-	}
+    {
+      for (int j = 0; j<3; j++)
+        {
+          mat0[i][j] = mat2[i][j];
+        }
+    }
     }
   for (int p = 1; p< power; p++)
     {
       for (int i = 0; i <3; i++)
-	{
-	  for (int j = 0; j < 3; j++)
-	    {
-	      mat0[i][j] = 0.0;
-	      for (int k = 0; k < 3; k++)
-		{
-		  mat0[i][j] += mat1[i][k]*mat2[k][j];
-		}
-	    }
-	}
+    {
+      for (int j = 0; j < 3; j++)
+        {
+          mat0[i][j] = 0.0;
+          for (int k = 0; k < 3; k++)
+        {
+          mat0[i][j] += mat1[i][k]*mat2[k][j];
+        }
+        }
+    }
       for (int i = 0; i< 3; i++)
-	{
-	  for (int j = 0; j<3; j++)
-	    {
-	      mat1[i][j] = mat0[i][j];
-	    }
-	}
+    {
+      for (int j = 0; j<3; j++)
+        {
+          mat1[i][j] = mat0[i][j];
+        }
+    }
     }
 
   return; 
@@ -135,13 +135,13 @@ void mat_mul(long double mat0[3][3],long double mat1[3][3], long double mat2[3][
   for (int i = 0; i< 3; i++)
     {
       for (int j = 0; j<3; j++)
-	{
-	  mat0[i][j] = 0.0;
-	  for (int k = 0; k < 3; k++)
-	    {
-	      mat0[i][j] += mat1[i][k]*mat2[k][j];
-	    }
-	}
+    {
+      mat0[i][j] = 0.0;
+      for (int k = 0; k < 3; k++)
+        {
+          mat0[i][j] += mat1[i][k]*mat2[k][j];
+        }
+    }
     }
   return; 
 } 
@@ -198,218 +198,218 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3])
     t = 0;
     for (int h = 0; h< IT; h ++)
       {
-	if (k[h] == 0 || k[h] == 2)
-	  {
-	    for (int ij = 1; ij< 7; ij++)
-	      {
-		for (int i = 0; i<3; i++)
-		  {
-		    vec1[i] = cell2[0][i];
-		  }
-		mat_pow(rotmf,rotm1,ij-1);
-		mat_vec_mul(vec2,vec1,rotmf);
-		for (int i = 0; i<3; i++)
-		  {
-		    locs[i] = llocs[y-1][i][h]+vec2[i];
-		    locs0[i] = llocs[y-1][i][h];
-		  }		 
-		R[ij] = R[ij-1]+r1*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
-	      }
-	    for (int ij = 7; ij< 10; ij++)
-	      {
-		for (int i = 0; i<3; i++)
-		  {
-		    vec1[i] = spos_Si[k[h]][i]-spos_Si[k[h]+1][i];
-		  }
-		mat_pow(rotmf,rotm2,ij-7);
-		mat_mul(mf,cell2,rotmf);
-		mat_vec_mul(vec2,vec1,mf);
-		for (int i = 0; i<3; i++)
-		  {
-		    locs[i] = llocs[y-1][i][h]+vec2[i];
-		    locs0[i] = llocs[y-1][i][h];
-		  }
-		R[ij] = R[ij-1]+r3*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
-	      }
-	    for (int ij = 10; ij< 13; ij++)
-	      {
-		for (int i = 0; i<3; i++)
-		  {
-		    vec1[i] = spos_Si[k[h]+2][i]-spos_Si[k[h]+1][i];
-		  }
-		mat_pow(rotmf,rotm2,ij-10);
-		mat_mul(mf,cell2,rotmf);
-		mat_vec_mul(vec2,vec1,mf);
-		for (int i = 0; i<3; i++)
-		  {
-		    locs[i] = llocs[y-1][i][h]+vec2[i];
-		    locs0[i] = llocs[y-1][i][h];
-		  }
-		R[ij] = R[ij-1]+r4*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
-	      }
-	    for (int ij = 13; ij < 17; ij++)
-	      {
-		R[ij] = r5+R[ij-1];
-	      }
-	  }
-	else if (k[h] == 1 || k[h] == 3)
-	  {
-	    for (int ij = 1; ij< 7; ij++)
-	      {
-		for (int i = 0; i<3; i++)
-		  {
-		    vec1[i] = cell2[0][i];
-		  }
-		mat_pow(rotmf,rotm1,ij-1);
-		mat_vec_mul(vec2,vec1,rotmf);
-		for (int i = 0; i<3; i++)
-		  {
-		    locs[i] = llocs[y-1][i][h]+vec2[i];
-		    locs0[i] = llocs[y-1][i][h];
-		  }
-		R[ij] = R[ij-1]+r2*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
-	      }
-	    for (int ij = 7; ij< 10; ij++)
-	      {
-		for (int i = 0; i<3; i++)
-		  {
-		    vec1[i] = spos_Si[k[h]][i]-spos_Si[k[h]+1][i];
-		  }
-		mat_pow(rotmf,rotm2,ij-7);
-		mat_mul(mf,cell2,rotmf);
-		mat_vec_mul(vec2,vec1,mf);
-		for (int i = 0; i<3; i++)
-		  {
-		    locs[i] = llocs[y-1][i][h]+vec2[i];
-		    locs0[i] = llocs[y-1][i][h];
-		  }
-		R[ij] = R[ij-1]+r4*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
-	      }
-	    for (int ij = 10; ij< 13; ij++)
-	      {
-		for (int i = 0; i<3; i++)
-		  {
-		    vec1[i] = spos_Si[k[h]+2][i]-spos_Si[k[h]+1][i];
-		  }
-		mat_pow(rotmf,rotm2,ij-10);
-		mat_mul(mf,cell2,rotmf);
-		mat_vec_mul(vec2,vec1,mf);
-		for (int i = 0; i<3; i++)
-		  {
-		    locs[i] = llocs[y-1][i][h]+vec2[i];
-		    locs0[i] = llocs[y-1][i][h];
-		  }
-		R[ij] = R[ij-1]+r3*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
-	      }
-	    for (int ij = 13; ij < 17; ij++)
-	      {
-		R[ij] = r5+R[ij-1];
-	      }
-	  }
-	else if (k[h] == 4)
-	  {
+    if (k[h] == 0 || k[h] == 2)
+      {
+        for (int ij = 1; ij< 7; ij++)
+          {
+        for (int i = 0; i<3; i++)
+          {
+            vec1[i] = cell2[0][i];
+          }
+        mat_pow(rotmf,rotm1,ij-1);
+        mat_vec_mul(vec2,vec1,rotmf);
+        for (int i = 0; i<3; i++)
+          {
+            locs[i] = llocs[y-1][i][h]+vec2[i];
+            locs0[i] = llocs[y-1][i][h];
+          }         
+        R[ij] = R[ij-1]+r1*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
+          }
+        for (int ij = 7; ij< 10; ij++)
+          {
+        for (int i = 0; i<3; i++)
+          {
+            vec1[i] = spos_Si[k[h]][i]-spos_Si[k[h]+1][i];
+          }
+        mat_pow(rotmf,rotm2,ij-7);
+        mat_mul(mf,cell2,rotmf);
+        mat_vec_mul(vec2,vec1,mf);
+        for (int i = 0; i<3; i++)
+          {
+            locs[i] = llocs[y-1][i][h]+vec2[i];
+            locs0[i] = llocs[y-1][i][h];
+          }
+        R[ij] = R[ij-1]+r3*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
+          }
+        for (int ij = 10; ij< 13; ij++)
+          {
+        for (int i = 0; i<3; i++)
+          {
+            vec1[i] = spos_Si[k[h]+2][i]-spos_Si[k[h]+1][i];
+          }
+        mat_pow(rotmf,rotm2,ij-10);
+        mat_mul(mf,cell2,rotmf);
+        mat_vec_mul(vec2,vec1,mf);
+        for (int i = 0; i<3; i++)
+          {
+            locs[i] = llocs[y-1][i][h]+vec2[i];
+            locs0[i] = llocs[y-1][i][h];
+          }
+        R[ij] = R[ij-1]+r4*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
+          }
+        for (int ij = 13; ij < 17; ij++)
+          {
+        R[ij] = r5+R[ij-1];
+          }
+      }
+    else if (k[h] == 1 || k[h] == 3)
+      {
+        for (int ij = 1; ij< 7; ij++)
+          {
+        for (int i = 0; i<3; i++)
+          {
+            vec1[i] = cell2[0][i];
+          }
+        mat_pow(rotmf,rotm1,ij-1);
+        mat_vec_mul(vec2,vec1,rotmf);
+        for (int i = 0; i<3; i++)
+          {
+            locs[i] = llocs[y-1][i][h]+vec2[i];
+            locs0[i] = llocs[y-1][i][h];
+          }
+        R[ij] = R[ij-1]+r2*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
+          }
+        for (int ij = 7; ij< 10; ij++)
+          {
+        for (int i = 0; i<3; i++)
+          {
+            vec1[i] = spos_Si[k[h]][i]-spos_Si[k[h]+1][i];
+          }
+        mat_pow(rotmf,rotm2,ij-7);
+        mat_mul(mf,cell2,rotmf);
+        mat_vec_mul(vec2,vec1,mf);
+        for (int i = 0; i<3; i++)
+          {
+            locs[i] = llocs[y-1][i][h]+vec2[i];
+            locs0[i] = llocs[y-1][i][h];
+          }
+        R[ij] = R[ij-1]+r4*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
+          }
+        for (int ij = 10; ij< 13; ij++)
+          {
+        for (int i = 0; i<3; i++)
+          {
+            vec1[i] = spos_Si[k[h]+2][i]-spos_Si[k[h]+1][i];
+          }
+        mat_pow(rotmf,rotm2,ij-10);
+        mat_mul(mf,cell2,rotmf);
+        mat_vec_mul(vec2,vec1,mf);
+        for (int i = 0; i<3; i++)
+          {
+            locs[i] = llocs[y-1][i][h]+vec2[i];
+            locs0[i] = llocs[y-1][i][h];
+          }
+        R[ij] = R[ij-1]+r3*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
+          }
+        for (int ij = 13; ij < 17; ij++)
+          {
+        R[ij] = r5+R[ij-1];
+          }
+      }
+    else if (k[h] == 4)
+      {
             continue;
-	  }
-	Q = R[16];
-	u1 = (1.0*((rand()%(RAND_MAX-1))+1))/(1.0*RAND_MAX);
-	test = Q*u1;
-	L = 0;
-	E = 15;
-	for (int j = 0; j< 17; j++)
-	  {
+      }
+    Q = R[16];
+    u1 = (1.0*((rand()%(RAND_MAX-1))+1))/(1.0*RAND_MAX);
+    test = Q*u1;
+    L = 0;
+    E = 15;
+    for (int j = 0; j< 17; j++)
+      {
             if (L>E)
-	      {
-		printf("\nunsuccessful\n");
-	      }
+          {
+        printf("\nunsuccessful\n");
+          }
             m = (int) floor((E+L)/2);
             if (R[m]<test && R[m+1]<test)
-	      {
-	    L = m+1;
-	      }
+          {
+        L = m+1;
+          }
             else if (R[m]>test && R[m+1] > test)
-	      {
-		 E = m-1;
-	      }
+          {
+         E = m-1;
+          }
             else
-	      {
-	      break;
-	      }
-	  }
+          {
+          break;
+          }
+      }
         if (m < 6)
-	  {
-	    for (int i = 0; i<3; i++)
-		  {
-		    vec1[i] = cell2[0][i];
-		  }
-	    mat_pow(rotmf,rotm1,m);
-	    mat_vec_mul(vec2,vec1,rotmf);
-	    for (int i = 0; i<3; i++)
-	      {
-		llocs[y][i][h] = llocs[y-1][i][h]+vec2[i];
-	      }
-	  }
+      {
+        for (int i = 0; i<3; i++)
+          {
+            vec1[i] = cell2[0][i];
+          }
+        mat_pow(rotmf,rotm1,m);
+        mat_vec_mul(vec2,vec1,rotmf);
+        for (int i = 0; i<3; i++)
+          {
+        llocs[y][i][h] = llocs[y-1][i][h]+vec2[i];
+          }
+      }
         else if (m <9)
-	  {
-	    for (int i = 0; i<3; i++)
-	      {
-		vec1[i] = spos_Si[k[h]][i]-spos_Si[k[h]+1][i];
-	      }
-	    mat_pow(rotmf,rotm2,m-6);
-	    mat_mul(mf,cell2,rotmf);
-	    mat_vec_mul(vec2,vec1,mf);
-	    for (int i = 0; i<3; i++)
-	      {
-		llocs[y][i][h] = llocs[y-1][i][h]+vec2[i];
-	      }
-	    k[h] = (k[h]+3)%4;
-	  }
-	else if (m < 12)
-	  {
-	    for (int i = 0; i<3; i++)
-	      {
-		vec1[i] = spos_Si[k[h]+2][i]-spos_Si[k[h]+1][i];
-	      }
-	    mat_pow(rotmf,rotm2,m-9);
-	    mat_mul(mf,cell2,rotmf);
-	    mat_vec_mul(vec2,vec1,mf);
-	    for (int i = 0; i<3; i++)
-	      {
-		llocs[y][i][h] = llocs[y-1][i][h]+vec2[i];
-	      }
-	    k[h] = (k[h]+1)%4;
-	  }
-	else if (m > 11)
-	  {
-	    for (int i = y; i<N; i++)
-	      {
-		llocs[i][0][h] = llocs[y-1][0][h];
-		llocs[i][1][h] = llocs[y-1][1][h];
-		llocs[i][2][h] = llocs[y-1][2][h];
-	      }
-	    k[h] = 4;
-	    chg[h] = 2;
-	    itt = (itt-1) < 1? (switcher = 1) : itt;  
-	    itt = (itt-1) > 1? (itt-1): 1;
-	  }
-	else
-	  {
-	    printf("\nunsuccessful\n");
-	  }
-	u1 = (1.0*((rand()%(RAND_MAX-1))+1))/(1.0*RAND_MAX);
-	t = t +1/Q*log(1/u1)/itt;
+      {
+        for (int i = 0; i<3; i++)
+          {
+        vec1[i] = spos_Si[k[h]][i]-spos_Si[k[h]+1][i];
+          }
+        mat_pow(rotmf,rotm2,m-6);
+        mat_mul(mf,cell2,rotmf);
+        mat_vec_mul(vec2,vec1,mf);
+        for (int i = 0; i<3; i++)
+          {
+        llocs[y][i][h] = llocs[y-1][i][h]+vec2[i];
+          }
+        k[h] = (k[h]+3)%4;
+      }
+    else if (m < 12)
+      {
+        for (int i = 0; i<3; i++)
+          {
+        vec1[i] = spos_Si[k[h]+2][i]-spos_Si[k[h]+1][i];
+          }
+        mat_pow(rotmf,rotm2,m-9);
+        mat_mul(mf,cell2,rotmf);
+        mat_vec_mul(vec2,vec1,mf);
+        for (int i = 0; i<3; i++)
+          {
+        llocs[y][i][h] = llocs[y-1][i][h]+vec2[i];
+          }
+        k[h] = (k[h]+1)%4;
+      }
+    else if (m > 11)
+      {
+        for (int i = y; i<N; i++)
+          {
+        llocs[i][0][h] = llocs[y-1][0][h];
+        llocs[i][1][h] = llocs[y-1][1][h];
+        llocs[i][2][h] = llocs[y-1][2][h];
+          }
+        k[h] = 4;
+        chg[h] = 2;
+        itt = (itt-1) < 1? (switcher = 1) : itt;  
+        itt = (itt-1) > 1? (itt-1): 1;
+      }
+    else
+      {
+        printf("\nunsuccessful\n");
+      }
+    u1 = (1.0*((rand()%(RAND_MAX-1))+1))/(1.0*RAND_MAX);
+    t = t +1/Q*log(1/u1)/itt;
       }
     if(switcher == 1)
       {
-	break;
+    break;
       }
     tt = tt +t;
     }
   /*  for (int i = 0; i < IT; i++)
     {
       if (llocs[5][0][i] != llocs[6][0][i])
-	{
-	  printf("%Lf %Lf\n",llocs[5][0][i]*1e9,llocs[5][1][i]*1e9);
-	}
+    {
+      printf("%Lf %Lf\n",llocs[5][0][i]*1e9,llocs[5][1][i]*1e9);
+    }
     } 
 */
 } 
