@@ -278,9 +278,10 @@ int main(int argc, char** argv)
   P[0][2] = 0.0;
   P[0][3] = 0.0;
   P[0][4] = 1.0;
-  for (int i = 0; i< pow(12,N); i++)
+  for (int i = 0; i < pow(12,N); i++)
     {
       checker[i] = 0;
+      P2[i][4] = 0.0;
     }
   printf("%Lf\n",P[0][4]);
   BFS(cell2,spos_Si,P,0,0); 
@@ -293,17 +294,18 @@ int main(int argc, char** argv)
       
       for (int j = i; j < pow(12,N); j++)
 	{
-	  if (((checker[j] ==0 && P[j][0] == P[i][0]) && (P[j][1] == P[i][1] && P[j][2] == P[i][2])) && (P[j][3] == P[i][3]))
+	  if (((checker[j] == 0 && P[j][0] == P[i][0]) && (P[j][1] == P[i][1] && P[j][2] == P[i][2])) && (P[j][3] == P[i][3]))
 	    {
 	      P2[i][4] += P[j][4];
+	      checker[j] = 1;
 	    }
 	}
     }
   for (int i = 0; i < pow(12,N); i++)
     {
-      if (P2[i][4]> 0.0)
+      if (P2[i][4] > 0.0)
 	{
-	  printf("%Lf %Lf %Lf %Lf %Lf\n",P2[i][0]*1e9,P2[i][1]*1e9,P2[i][2]*1e9,P2[i][3],P2[i][4]);
+	  printf("%Lf %Lf %Lf %Lf %.11Lf\n",P2[i][0]*1e9,P2[i][1]*1e9,P2[i][2]*1e9,P2[i][3],P2[i][4]);
 	}
     }
   return 0;
