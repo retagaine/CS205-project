@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 2
+#define N 5
 
 /* Barriers */
 long double E_1_l = 2.951646;
@@ -52,8 +52,24 @@ long double rotm2[3][3] = {
                             {0.0, 0.0, 1.0}
                           };
 
+// mat0 is product, mat1, mat2 are things to be multiplied
+void mat_mul(long double prod[3][3], long double mat1[3][3], long double mat2[3][3]) {
+  int i, j, k;
+
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
+      prod[i][j] = 0.0;
+      for (k = 0; k < 3; k++) {
+        prod[i][j] += mat1[i][k] * mat2[k][j];
+      }
+    }
+  }
+
+  return; 
+} 
+
 void r_mat_pow (long double mat[3][3], long double prod[3][3], int power) {
-  int i, j;
+  int i, j, k;
 
   // set to identity matrix
   for (i = 0; i < 3; i++) {
@@ -174,29 +190,13 @@ void mat_pow(long double mat0[3][3], long double mat2[3][3], int power) {
   return; 
 }
 
-// mat0 is product, mat1, mat2 are things to be multiplied
-void mat_mul(long double mat0[3][3], long double mat1[3][3], long double mat2[3][3]) {
-  int i, j, k;
-
-  for (i = 0; i < 3; i++) {
-    for (j = 0; j < 3; j++) {
-	    mat0[i][j] = 0.0;
-	    for (k = 0; k < 3; k++) {
-	      mat0[i][j] += mat1[i][k] * mat2[k][j];
-	    }
-	  }
-  }
-
-  return; 
-} 
-
-void mat_vec_mul(long double vec0[3], long double vec1[3], long double mat0[3][3]) {
+void mat_vec_mul(long double prod[3], long double vec[3], long double mat[3][3]) {
   int i, k;
   
   for (i = 0; i < 3; i++) {
-    vec0[i] = 0.0;
+    prod[i] = 0.0;
     for (int k = 0; k < 3; k++) {
-      vec0[i] += vec1[k] * mat0[k][i];
+      prod[i] += vec[k] * mat[k][i];
     }
   }
   
@@ -328,42 +328,67 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3], long double P[(int)
   return;
 } 
  
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
+  int P_SIZE = (int) pow(12, N);
+  int i, j;
+
   // initializes all elements to 0
-  long double P[(int) pow(12,N)][5] = {{0.0}};
-  long double P2[(int) pow(12,N)][5] = {{0.0}};    
-  int checker[(int) pow(12,N)] = {0};
+  long double (*P)[5];
+  long double (*P2)[5];
+  P = malloc(P_SIZE * sizeof(long double[5]));
+  P2 = malloc(P_SIZE * sizeof(long double[5]));
+
+  int *checker;
+  checker = malloc(P_SIZE * sizeof(int));
+
+  for (i = 0; i < P_SIZE; i++) {
+    for (j = 0; j < N; j++) {
+      P[i][j] = 0.0;
+      P2[i][j] = 0.0;
+    }
+    checker[i] = 0;
+  }
+
   long double cell2[3][3] = {
                               {nnd, 0*a, 0*a},
                               {-nnd/2,nnd/2*sqrt(3), 0*a},
                               {0*1.0, 0*1.0, 10.086*c*nnd/3.078*a/2.57218587467527*2.51866888630220}
                             };
+
   /* Intializes random number generator */
+  P[0][0] = 0.0;
+  P[0][1] = 0.0;
+  P[0][2] = 0.0;
+  P[0][3] = 0.0;
   P[0][4] = 1.0;
 
   printf("%Lf\n", P[0][4]);
-  
-  BFS(cell2,spos_Si,P,0,0); 
-  for (int i = 0; i < pow(12, N); i++) {
+
+  BFS(cell2,spos_Si,P,0,0);
+
+  for (i = 0; i < pow(12, N); i++) {
     P2[i][0] = P[i][0];
     P2[i][1] = P[i][1];
     P2[i][2] = P[i][2];
     P2[i][3] = P[i][3];
       
-    for (int j = i; j < pow(12,N); j++) {
-  	  if (((checker[j] == 0 && P[j][0] == P[i][0]) && (P[j][1] == P[i][1] && P[j][2] == P[i][2])) && (P[j][3] == P[i][3])) {
+    for (j = i; j < pow(12, N); j++) {
+  	  if (((checker[j] == 0 && P[j][0] == P[i][0]) &&
+          (P[j][1] == P[i][1] && P[j][2] == P[i][2])) &&
+          (P[j][3] == P[i][3])) {
   	      P2[i][4] += P[j][4];
   	      checker[j] = 1;
   	  }
 	  }
   }
 
-  for (int i = 0; i < pow(12,N); i++) {
+  for (i = 0; i < pow(12, N); i++) {
     if (P2[i][4] > 0.0) {
-  	  printf("%Lf %Lf %Lf %Lf %.11Lf\n",P2[i][0]*1e9,P2[i][1]*1e9,P2[i][2]*1e9,P2[i][3],P2[i][4]);
+  	  printf("%Lf %Lf %Lf %Lf %.11Lf\n", P2[i][0]*1e9, P2[i][1]*1e9, P2[i][2]*1e9, P2[i][3], P2[i][4]);
   	}
   }
-  
+
+  // remember to free P, P2, checker
+
   return 0;
 }
