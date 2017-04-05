@@ -40,13 +40,13 @@ for jj = 1:n
         hold on;
         maxer = max(B(jj:end,5));
         for ii = 1:jj
-            scatter(B(ii,1),B(ii,2),'o','filled','MarkerEdgeColor',col(round(63*min([1,B(ii,5)/maxer]))+1,:),'MarkerFaceColor',col(round(63*min([1,B(ii,5)/maxer]))+1,:),'SizeData',800)
+            scatter(B(ii,1),B(ii,2),'s','filled','MarkerEdgeColor',col(round(63*min([1,B(ii,5)/maxer]))+1,:),'MarkerFaceColor',col(round(63*min([1,B(ii,5)/maxer]))+1,:),'SizeData',800)
         end
         for ii = jj+1:n
-           scatter(B(ii,1),B(ii,2),'o','filled','MarkerEdgeColor',col(round(63*min([0,B(ii,5)/maxer]))+1,:),'MarkerFaceColor',col(round(63*min([0,B(ii,5)/maxer]))+1,:),'SizeData',800)
+           scatter(B(ii,1),B(ii,2),'s','filled','MarkerEdgeColor',col(round(63*min([0,B(ii,5)/maxer]))+1,:),'MarkerFaceColor',col(round(63*min([0,B(ii,5)/maxer]))+1,:),'SizeData',800)
         end
     end
-    scatter(B(jj,1),B(jj,2),'o','filled','MarkerEdgeColor',col(round(63*min([1,B(jj,5)/maxer]))+1,:),'MarkerFaceColor',col(round(63*min([1,B(jj,5)/maxer]))+1,:),'SizeData',800)
+    scatter(B(jj,1),B(jj,2),'s','filled','MarkerEdgeColor',col(round(63*min([1,B(jj,5)/maxer]))+1,:),'MarkerFaceColor',col(round(63*min([1,B(jj,5)/maxer]))+1,:),'SizeData',800)
 end
 xlim([-0.8,0.8]);
 ylim([-0.8,0.8]);
