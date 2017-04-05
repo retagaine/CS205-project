@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 5
+#define N 4
+#define P_SIZE ((int) pow(12, N))
 
 /* Barriers */
 long double E_1_l = 2.951646;
@@ -52,6 +53,8 @@ long double rotm2[3][3] = {
                             {0.0, 0.0, 1.0}
                           };
 
+long double cell2[3][3];
+
 // mat0 is product, mat1, mat2 are things to be multiplied
 void mat_mul(long double prod[3][3], long double mat1[3][3], long double mat2[3][3]) {
   int i, j, k;
@@ -66,84 +69,13 @@ void mat_mul(long double prod[3][3], long double mat1[3][3], long double mat2[3]
   }
 
   return; 
-} 
-
-void r_mat_pow (long double mat[3][3], long double prod[3][3], int power) {
-  int i, j, k;
-
-  // set to identity matrix
-  for (i = 0; i < 3; i++) {
-    for (j = 0; j < 3; j++) {
-      if (i == j) {
-        prod[i][j] = 1.0;
-      }
-      else {
-        prod[i][j] = 0.0;
-      }
-    }
-  }
-
-  if (power == 0) {
-    return;  
-  }
-  // repeated exponentiation
-  else {
-    long double temp[3][3];
-    while (power != 0) {
-      if (power % 2 == 1) {
-        mat_mul(temp, prod, mat);
-      }
-
-      // set product to the temp product in the mat_mul
-      // might be a bug here because it might have to go inside the if statement
-      for (i = 0; i < 3; i++) {
-        for (j = 0; j < 3; j++) {
-          prod[i][j] = temp[i][j];
-          // let temp = mat^2
-          for (k = 0; k < 3; k++) {
-            temp[i][j] = mat[i][k] * mat[k][j];
-          }
-        }
-      }
-
-      // let mat = mat^2
-      for (i = 0; i < 3; i++) {
-        for (j = 0; j < 3; j++) {
-          mat[i][j] = temp[i][j];
-        }
-      }
-      // NOT DONE: square mat, set prod to temp
-      // bit shift
-      power = power >> 1;
-    }
-  }
-
-  return;
 }
-
-// // uses pointers in matrix multiplication
-// void p_mat_mul (long double *mat1[3][3], long double *mat2[3][3], long double *prod[3][3]) {
-//   int i, j, k;
-
-//   for (i = 0; i < 3; i++) {
-//     for (j = 0; j < 3; j++) {
-//       (*prod)[i][j] = 0.0;
-//       for (k = 0; k < 3; k++) {
-//         (*prod)[i][j] += (*mat1)[i][k] * (*mat2)[k][j];
-//       }
-//     }
-//   }
-
-//   return;
-// }
 
 // mat0 stores the product, mat2 is the thing to be exponentiated
 void mat_pow(long double mat0[3][3], long double mat2[3][3], int power) {
   long double mat1[3][3];
   for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-  	  mat1[i][j] = mat2[i][j];
-  	}
+    memcpy(&mat1[i], &mat2[i], sizeof(mat2[0]));
   }
 
   // if power == 0, set mat0 to identity matrix
@@ -163,9 +95,7 @@ void mat_pow(long double mat0[3][3], long double mat2[3][3], int power) {
   // if power == 1, set mat0 to mat2
   else if (power == 1) {
     for (int i = 0; i < 3; i++) {
-	    for (int j = 0; j < 3; j++) {
-	      mat0[i][j] = mat2[i][j];
-	    }
+      memcpy(&mat0[i], &mat2[i], sizeof(mat2[0]));
 	  }
   }
 
@@ -181,9 +111,7 @@ void mat_pow(long double mat0[3][3], long double mat2[3][3], int power) {
 	  }
     // let mat1 = mat2**2
     for (int i = 0; i < 3; i++) {
-	    for (int j = 0; j < 3; j++) {
-	      mat1[i][j] = mat0[i][j];
-	    }
+      memcpy(&mat1[i], &mat0[i], sizeof(mat0[0]));
 	  }
   }
 
@@ -204,7 +132,7 @@ void mat_vec_mul(long double prod[3], long double vec[3], long double mat[3][3])
 }
 
 /* Run simulation */
-void BFS(long double cell2[3][3], long double spos_Si[6][3], long double P[(int) pow(12, N)][5], long int index, int swtch) {
+void BFS(long double P[P_SIZE][5], long int index, int swtch) {
 
   if (log(12.0*index + 1.0)/log(12.0) >= N) {
     return;
@@ -229,9 +157,14 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3], long double P[(int)
   Q2 = 6*r2+3*r3+3*r4+4*r5;
 
   int i, ij;
+  // new index
+  int n_index;
 
   if (swtch == 0 || swtch == 2) {
     for (ij = 1; ij < 13; ij++) {
+
+      n_index = 12*index + ij;
+
       if (ij < 7) {
   	    for (i = 0; i < 3; i++) {
   		    vec1[i] = cell2[0][i];
@@ -239,26 +172,26 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3], long double P[(int)
         mat_pow(rotmf,rotm1,ij-1);
         mat_vec_mul(vec2,vec1,rotmf);
   	    for (i = 0; i < 3; i++) {
-  		    P[12*index+ij][i] = P[index][i]+vec2[i];
+  		    P[n_index][i] = P[index][i]+vec2[i];
   		  }		 
-        P[12*index+ij][4] = r1/Q1*P[index][4];
-        P[12*index+ij][3] = 1/Q1+P[index][3];
-        BFS(cell2, spos_Si, P, 12*index+ij, swtch);
+        P[n_index][4] = r1/Q1*P[index][4];
+        P[n_index][3] = 1/Q1+P[index][3];
+        BFS(P, n_index, swtch);
   	  }
   	  
       else if (ij < 10) {
-  	    for (i = 0; i<3; i++) {
+  	    for (i = 0; i < 3; i++) {
       	  vec1[i] = spos_Si[swtch][i]-spos_Si[swtch+1][i];
       	}
         mat_pow(rotmf,rotm2,ij-7);
         mat_mul(mf,cell2,rotmf);
         mat_vec_mul(vec2,vec1,mf);
   	    for (i = 0; i < 3; i++) {
-  		    P[12*index+ij][i] = P[index][i]+vec2[i];
+  		    P[n_index][i] = P[index][i]+vec2[i];
   	  	}		 
-        P[12*index+ij][4] = r3/Q1*P[index][4];
-        P[12*index+ij][3] = 1/Q1+P[index][3];
-        BFS(cell2, spos_Si, P, 12*index+ij, (swtch+3)%4);
+        P[n_index][4] = r3/Q1*P[index][4];
+        P[n_index][3] = 1/Q1+P[index][3];
+        BFS(P, n_index, (swtch+3)%4);
   	  }
   	  
       else {
@@ -269,17 +202,20 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3], long double P[(int)
         mat_mul(mf,cell2,rotmf);
         mat_vec_mul(vec2,vec1,mf);
   	    for (i = 0; i < 3; i++) {
-  		    P[12*index+ij][i] = P[index][i]+vec2[i];
+  		    P[n_index][i] = P[index][i]+vec2[i];
   		  }		 
-        P[12*index+ij][4] = r4/Q1*P[index][4];
-        P[12*index+ij][3] = 1/Q1+P[index][3];
-        BFS(cell2, spos_Si, P, 12*index+ij, (swtch+1)%4);
+        P[n_index][4] = r4/Q1*P[index][4];
+        P[n_index][3] = 1/Q1+P[index][3];
+        BFS(P, n_index, (swtch+1)%4);
   	  }
 	  }
   }
 
   else if (swtch == 1 || swtch == 3) {
     for (ij = 1; ij < 13; ij++) {
+      
+      n_index = 12*index + ij;
+
 	    if (ij < 7) {
 	      for (i = 0; i < 3; i++) {
     		  vec1[i] = cell2[0][i];
@@ -287,11 +223,11 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3], long double P[(int)
 	      mat_pow(rotmf,rotm1,ij-1);
 	      mat_vec_mul(vec2,vec1,rotmf);
 	      for (i = 0; i < 3; i++) {
-		      P[12*index+ij][i] = P[index][i]+vec2[i];
+		      P[n_index][i] = P[index][i]+vec2[i];
 	      }		 
-	      P[12*index+ij][4] = r2/Q2*P[index][4];
-	      P[12*index+ij][3] = 1/Q2+P[index][3];
-	      BFS(cell2, spos_Si, P, 12*index+ij, swtch);
+	      P[n_index][4] = r2/Q2*P[index][4];
+	      P[n_index][3] = 1/Q2+P[index][3];
+	      BFS(P, n_index, swtch);
 	    }
 
 	    else if (ij < 10) {
@@ -302,11 +238,11 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3], long double P[(int)
 	      mat_mul(mf,cell2,rotmf);
 	      mat_vec_mul(vec2,vec1,mf);
 	      for (i = 0; i < 3; i++) {
-    		  P[12*index+ij][i] = P[index][i]+vec2[i];
+    		  P[n_index][i] = P[index][i]+vec2[i];
     		}		 
-	      P[12*index+ij][4] = r4/Q2*P[index][4];
-	      P[12*index+ij][3] = 1/Q2+P[index][3];
-	      BFS(cell2, spos_Si, P, 12*index+ij, (swtch+3)%4);
+	      P[n_index][4] = r4/Q2*P[index][4];
+	      P[n_index][3] = 1/Q2+P[index][3];
+	      BFS(P, n_index, (swtch+3)%4);
 	    }
 
 	    else if (ij < 13) {
@@ -317,11 +253,11 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3], long double P[(int)
 	      mat_mul(mf,cell2,rotmf);
 	      mat_vec_mul(vec2,vec1,mf);
 	      for (i = 0; i < 3; i++) {
-    		  P[12*index+ij][i] = P[index][i]+vec2[i];
+    		  P[n_index][i] = P[index][i]+vec2[i];
     		}		 
-	      P[12*index+ij][4] = r3/Q2*P[index][4];
-	      P[12*index+ij][3] = 1/Q2+P[index][3];
-	      BFS(cell2, spos_Si, P, 12*index+ij, (swtch+1)%4);
+	      P[n_index][4] = r3/Q2*P[index][4];
+	      P[n_index][3] = 1/Q2+P[index][3];
+	      BFS(P, n_index, (swtch+1)%4);
 	    }
 	  }
   }
@@ -329,10 +265,8 @@ void BFS(long double cell2[3][3], long double spos_Si[6][3], long double P[(int)
 } 
  
 int main(int argc, char** argv) {
-  int P_SIZE = (int) pow(12, N);
   int i, j;
 
-  // initializes all elements to 0
   long double (*P)[5];
   long double (*P2)[5];
   P = malloc(P_SIZE * sizeof(long double[5]));
@@ -341,6 +275,18 @@ int main(int argc, char** argv) {
   int *checker;
   checker = malloc(P_SIZE * sizeof(int));
 
+  // can't individually place after initialization
+  long double cell2_duplicate[3][3] = {
+            {nnd, 0*a, 0*a},
+            {-nnd/2,nnd/2*sqrt(3), 0*a},
+            {0*1.0, 0*1.0, 10.086*c*nnd/3.078*a/2.57218587467527*2.51866888630220}
+          };
+
+  for (i = 0; i < 3; i++) {
+    memcpy(&cell2[i], &cell2_duplicate, sizeof(cell2_duplicate[0]));
+  }
+
+  // initializes all elements to 0
   for (i = 0; i < P_SIZE; i++) {
     for (j = 0; j < N; j++) {
       P[i][j] = 0.0;
@@ -348,12 +294,6 @@ int main(int argc, char** argv) {
     }
     checker[i] = 0;
   }
-
-  long double cell2[3][3] = {
-                              {nnd, 0*a, 0*a},
-                              {-nnd/2,nnd/2*sqrt(3), 0*a},
-                              {0*1.0, 0*1.0, 10.086*c*nnd/3.078*a/2.57218587467527*2.51866888630220}
-                            };
 
   /* Intializes random number generator */
   P[0][0] = 0.0;
@@ -364,7 +304,7 @@ int main(int argc, char** argv) {
 
   printf("%Lf\n", P[0][4]);
 
-  BFS(cell2,spos_Si,P,0,0);
+  BFS(P, 0, 0);
 
   for (i = 0; i < pow(12, N); i++) {
     P2[i][0] = P[i][0];
