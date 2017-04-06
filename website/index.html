@@ -46,7 +46,7 @@
 
             <p>For the 1D case, we let $n_{1}$ be the number of steps to the right and $n_{2}$ be the number of steps to the left. The final position (with rightwards being positive) is then given by $d = n_{1} - n_{2}$ and the total number of steps is $N = n_{1} + n_{2}$. We know that the probability of taking $n_{1}$ steps to the right out of a total of $N$ steps is simply given by the number of ways to permute all the steps divided by the product of the number of ways to permute the right steps and the left steps and multiplied by the probability of taking a right step to the power of $n_{1}$ and the probability of taking a left step to the power of $n_{2}$, so:
 
-            $$p_{N}(n_{1}, n_{2}) = (\frac{1}{2})^{n_{1} + n_{2}}\frac{N!}{n_{1}!n_{2}!} = (\frac{1}{2})^{N}\frac{N!}{n_{1}!n_{2}!} = (\frac{1}{2})^{N}\frac{N!}{n_{1}!(N-n_{1})!} = (\frac{1}{2})^{N}\binom{N}{n_{1}}$$
+            $$p_{N}(n_{1}, n_{2}) = \left(\frac{1}{2}\right)^{n_{1} + n_{2}}\frac{N!}{n_{1}!n_{2}!} = \left(\frac{1}{2}\right)^{N}\frac{N!}{n_{1}!n_{2}!} = \left(\frac{1}{2}\right)^{N}\frac{N!}{n_{1}!(N-n_{1})!} = \left(\frac{1}{2}\right)^{N}\binom{N}{n_{1}}$$
 
             where we have assumed the probabilities of taking left and right steps to be equal. We can uniquely express $n_{1}$ and $n_{2}$ in terms of $d$ and $N$ by solving the system of two equations, and in doing so we obtain:
 
@@ -54,12 +54,12 @@
 
             Thus, the probability of ending up at a position $d$ after $N$ total steps is simply:
 
-            $$P_{N}(d) = p_{N}(n_{1}, n_{2}) = (\frac{1}{2})^{N}\binom{N}{\frac{N+d}{2}}$$
+            $$P_{N}(d) = p_{N}(n_{1}, n_{2}) = \left(\frac{1}{2}\right)^{N}\binom{N}{\frac{N+d}{2}}$$
             </p>
 
             <p>For the 2D case, we let $n_{1}$ be the number of steps to the right, $n_{2}$ be the number of steps to the left, $n_{3}$ be the number of steps upwards, and $n_{4}$ to be the number of steps downwards. Then:
 
-            $$p_{N}(n_{1}, n_{2}, n_{3}, n_{4}) = (\frac{1}{4})^{N}\frac{N!}{n_{1}!n_{2}!n_{3}!n_{4}!}$$
+            $$p_{N}(n_{1}, n_{2}, n_{3}, n_{4}) = \left(\frac{1}{4}\right)^{N}\frac{N!}{n_{1}!n_{2}!n_{3}!n_{4}!}$$
 
             assuming that the probability of taking a step in any direction is the same. If we let $d_{x} = n_{1} - n_{2}$ be our final horizontal position and $d_{y} = n_{3} - n_{4}$ be the final vertical position, then we can solve for $n_{1}$, $n_{2}$, and $n_{3}$ in terms of $d_{x}, d_{y}, N$, and $n_{4}$:
 
@@ -69,11 +69,11 @@
 
             $$n_{3} = d_{y} + n_{4}$$
 
-            We note that $n_{4}$ can range from $0$ to $\frac{N-d_{x}-d_{y}}{2}$, so:
+            We note that $n_{4}$ can range from $0$ to $\frac{N-d_{x}-d_{y}}{2}$ (the formula holds for $d_{x}, d_{y} \geq 0$ and for negative values of these variables we get infinite denominators for the unnecessary terms from taking factorials of negative numbers so that these unnecessary terms evaluate to zero and it is straightforward to show the expression reduces to the expression with non-negative $d_{x}$, $d_{y}$), so:
 
-            $$P_{N}(d_{x}, d_{y}) = \sum\limits_{n_{4} = 0}^{\frac{N-d_{x}-d_{y}}{2}} (\frac{1}{4})^{N} \frac{N!}{(\frac{N+d_{x}-d_{y}-2n_{4}}{2})!(\frac{N-d_{x}-d_{y}-2n_{4}}{2})!(d_{y}+n_{4})!n_{4}!}$$
+            $$P_{N}(d_{x}, d_{y}) = \sum\limits_{n_{4} = 0}^{\frac{N-\left|d_{x}\right|-d_{y}}{2}} \left(\frac{1}{4}\right)^{N} \frac{N!}{(\frac{N+d_{x}-d_{y}-2n_{4}}{2})!(\frac{N-d_{x}-d_{y}-2n_{4}}{2})!(d_{y}+n_{4})!n_{4}!}$$
 
-            $$= (\frac{1}{4})^{N} \frac{\Gamma(N+1) _{2}\tilde{F}_{1}(\frac{d_{y}-d_{x}-N}{2}, \frac{d_{x}+d_{y}-N}{2}; 1+d_{y}; 1)}{\Gamma(\frac{N+2-d_{x}-d_{y}}{2})\Gamma(\frac{N+2+d_{x}-d_{y}}{2})}$$
+            $$= \left(\frac{1}{4}\right)^{N} \frac{\Gamma(N+1) _{2}\tilde{F}_{1}\left(\frac{d_{y}-d_{x}-N}{2}, \frac{d_{x}+d_{y}-N}{2}; 1+d_{y}; 1\right)}{\Gamma\left(\frac{N+2-d_{x}-d_{y}}{2}\right)\Gamma\left(\frac{N+2+d_{x}-d_{y}}{2}\right)}$$
 
             where $\Gamma$ is the gamma function and $_{2}\tilde{F}_{1}$ is the regularized version of the hypergeometric function $_{2}F_{1}$.
             </p>
