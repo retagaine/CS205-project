@@ -2,3 +2,6 @@
 
 all:
 	gcc -o pBFS pBFS.c
+
+parallel:
+	gcc -fopenmp -o pBFS pBFS.c
