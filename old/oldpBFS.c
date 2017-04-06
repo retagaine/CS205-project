@@ -3,7 +3,6 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <omp.h>
 
 #define N 4
 #define P_SIZE ((int) pow(12, N))
@@ -60,18 +59,14 @@ long double cell2[3][3];
 void mat_mul(long double prod[3][3], long double mat1[3][3], long double mat2[3][3]) {
   int i, j, k;
 
-  // #pragma omp parallel shared(prod, mat1, mat2) private(i, j, k)
-  // {
-  //   #pragma omp for schedule(static)
-    for (i = 0; i < 3; i++) {
-      for (j = 0; j < 3; j++) {
-        prod[i][j] = 0.0;
-        for (k = 0; k < 3; k++) {
-          prod[i][j] += mat1[i][k] * mat2[k][j];
-        }
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
+      prod[i][j] = 0.0;
+      for (k = 0; k < 3; k++) {
+        prod[i][j] += mat1[i][k] * mat2[k][j];
       }
     }
-  // }
+  }
 
   return; 
 }
@@ -87,12 +82,12 @@ void mat_pow(long double mat0[3][3], long double mat2[3][3], int power) {
   if (power == 0) {
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-  	    if (i == j) {
-  	      mat0[i][j] = 1.0;
-  	    }
-    	  else {
-    	    mat0[i][j] = 0.0;
-    	  }
+          if (i == j) {
+            mat0[i][j] = 1.0;
+          }
+          else {
+            mat0[i][j] = 0.0;
+          }
       }
     }
   }
@@ -101,16 +96,23 @@ void mat_pow(long double mat0[3][3], long double mat2[3][3], int power) {
   else if (power == 1) {
     for (int i = 0; i < 3; i++) {
       memcpy(&mat0[i], &mat2[i], sizeof(mat2[0]));
-	  }
+      }
   }
 
   for (int p = 1; p < power; p++) {
-    // square mat2 and let mat0 equal mat2**2
-    mat_mul(mat0, mat1, mat2);
+    // square mat2 and let mat0 equal mat2**2?
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          mat0[i][j] = 0.0;
+          for (int k = 0; k < 3; k++) {
+              mat0[i][j] += mat1[i][k]*mat2[k][j];
+            }
+        }
+      }
     // let mat1 = mat2**2
     for (int i = 0; i < 3; i++) {
       memcpy(&mat1[i], &mat0[i], sizeof(mat0[0]));
-	  }
+      }
   }
 
   return; 
@@ -119,16 +121,12 @@ void mat_pow(long double mat0[3][3], long double mat2[3][3], int power) {
 void mat_vec_mul(long double prod[3], long double vec[3], long double mat[3][3]) {
   int i, k;
   
-  // #pragma omp parallel shared(prod, vec, mat) private (i, k)
-  // {
-  //   #pragma omp for schedule(static)
-    for (i = 0; i < 3; i++) {
-      prod[i] = 0.0;
-      for (int k = 0; k < 3; k++) {
-        prod[i] += vec[k] * mat[k][i];
-      }
+  for (i = 0; i < 3; i++) {
+    prod[i] = 0.0;
+    for (int k = 0; k < 3; k++) {
+      prod[i] += vec[k] * mat[k][i];
     }
-  // }
+  }
   
   return; 
 }
@@ -168,49 +166,49 @@ void BFS(long double P[P_SIZE][5], long int index, int swtch) {
       n_index = 12*index + ij;
 
       if (ij < 7) {
-  	    for (i = 0; i < 3; i++) {
-  		    vec1[i] = cell2[0][i];
-  		  }
+          for (i = 0; i < 3; i++) {
+              vec1[i] = cell2[0][i];
+            }
         mat_pow(rotmf,rotm1,ij-1);
         mat_vec_mul(vec2,vec1,rotmf);
-  	    for (i = 0; i < 3; i++) {
-  		    P[n_index][i] = P[index][i]+vec2[i];
-  		  }		 
+          for (i = 0; i < 3; i++) {
+              P[n_index][i] = P[index][i]+vec2[i];
+            }         
         P[n_index][4] = r1/Q1*P[index][4];
         P[n_index][3] = 1/Q1+P[index][3];
         BFS(P, n_index, swtch);
-  	  }
-  	  
+        }
+        
       else if (ij < 10) {
-  	    for (i = 0; i < 3; i++) {
-      	  vec1[i] = spos_Si[swtch][i]-spos_Si[swtch+1][i];
-      	}
+          for (i = 0; i < 3; i++) {
+            vec1[i] = spos_Si[swtch][i]-spos_Si[swtch+1][i];
+          }
         mat_pow(rotmf,rotm2,ij-7);
         mat_mul(mf,cell2,rotmf);
         mat_vec_mul(vec2,vec1,mf);
-  	    for (i = 0; i < 3; i++) {
-  		    P[n_index][i] = P[index][i]+vec2[i];
-  	  	}		 
+          for (i = 0; i < 3; i++) {
+              P[n_index][i] = P[index][i]+vec2[i];
+            }         
         P[n_index][4] = r3/Q1*P[index][4];
         P[n_index][3] = 1/Q1+P[index][3];
         BFS(P, n_index, (swtch+3)%4);
-  	  }
-  	  
+        }
+        
       else {
-  	    for (i = 0; i < 3; i++) {
-  		    vec1[i] = spos_Si[swtch+2][i]-spos_Si[swtch+1][i];
-  		  }
+          for (i = 0; i < 3; i++) {
+              vec1[i] = spos_Si[swtch+2][i]-spos_Si[swtch+1][i];
+            }
         mat_pow(rotmf,rotm2,ij-10);
         mat_mul(mf,cell2,rotmf);
         mat_vec_mul(vec2,vec1,mf);
-  	    for (i = 0; i < 3; i++) {
-  		    P[n_index][i] = P[index][i]+vec2[i];
-  		  }		 
+          for (i = 0; i < 3; i++) {
+              P[n_index][i] = P[index][i]+vec2[i];
+            }         
         P[n_index][4] = r4/Q1*P[index][4];
         P[n_index][3] = 1/Q1+P[index][3];
         BFS(P, n_index, (swtch+1)%4);
-  	  }
-	  }
+        }
+      }
   }
 
   else if (swtch == 1 || swtch == 3) {
@@ -218,59 +216,55 @@ void BFS(long double P[P_SIZE][5], long int index, int swtch) {
       
       n_index = 12*index + ij;
 
-	    if (ij < 7) {
-	      for (i = 0; i < 3; i++) {
-    		  vec1[i] = cell2[0][i];
-    		}
-	      mat_pow(rotmf,rotm1,ij-1);
-	      mat_vec_mul(vec2,vec1,rotmf);
-	      for (i = 0; i < 3; i++) {
-		      P[n_index][i] = P[index][i]+vec2[i];
-	      }		 
-	      P[n_index][4] = r2/Q2*P[index][4];
-	      P[n_index][3] = 1/Q2+P[index][3];
-	      BFS(P, n_index, swtch);
-	    }
+        if (ij < 7) {
+          for (i = 0; i < 3; i++) {
+              vec1[i] = cell2[0][i];
+            }
+          mat_pow(rotmf,rotm1,ij-1);
+          mat_vec_mul(vec2,vec1,rotmf);
+          for (i = 0; i < 3; i++) {
+              P[n_index][i] = P[index][i]+vec2[i];
+          }         
+          P[n_index][4] = r2/Q2*P[index][4];
+          P[n_index][3] = 1/Q2+P[index][3];
+          BFS(P, n_index, swtch);
+        }
 
-	    else if (ij < 10) {
-	      for (i = 0; i < 3; i++) {
-    		  vec1[i] = spos_Si[swtch][i]-spos_Si[swtch+1][i];
-    		}
-	      mat_pow(rotmf,rotm2,ij-7);
-	      mat_mul(mf,cell2,rotmf);
-	      mat_vec_mul(vec2,vec1,mf);
-	      for (i = 0; i < 3; i++) {
-    		  P[n_index][i] = P[index][i]+vec2[i];
-    		}		 
-	      P[n_index][4] = r4/Q2*P[index][4];
-	      P[n_index][3] = 1/Q2+P[index][3];
-	      BFS(P, n_index, (swtch+3)%4);
-	    }
+        else if (ij < 10) {
+          for (i = 0; i < 3; i++) {
+              vec1[i] = spos_Si[swtch][i]-spos_Si[swtch+1][i];
+            }
+          mat_pow(rotmf,rotm2,ij-7);
+          mat_mul(mf,cell2,rotmf);
+          mat_vec_mul(vec2,vec1,mf);
+          for (i = 0; i < 3; i++) {
+              P[n_index][i] = P[index][i]+vec2[i];
+            }         
+          P[n_index][4] = r4/Q2*P[index][4];
+          P[n_index][3] = 1/Q2+P[index][3];
+          BFS(P, n_index, (swtch+3)%4);
+        }
 
-	    else if (ij < 13) {
-	      for (i = 0; i < 3; i++) {
-      	  vec1[i] = spos_Si[swtch+2][i]-spos_Si[swtch+1][i];
-      	}
-	      mat_pow(rotmf,rotm2,ij-10);
-	      mat_mul(mf,cell2,rotmf);
-	      mat_vec_mul(vec2,vec1,mf);
-	      for (i = 0; i < 3; i++) {
-    		  P[n_index][i] = P[index][i]+vec2[i];
-    		}		 
-	      P[n_index][4] = r3/Q2*P[index][4];
-	      P[n_index][3] = 1/Q2+P[index][3];
-	      BFS(P, n_index, (swtch+1)%4);
-	    }
-	  }
+        else if (ij < 13) {
+          for (i = 0; i < 3; i++) {
+            vec1[i] = spos_Si[swtch+2][i]-spos_Si[swtch+1][i];
+          }
+          mat_pow(rotmf,rotm2,ij-10);
+          mat_mul(mf,cell2,rotmf);
+          mat_vec_mul(vec2,vec1,mf);
+          for (i = 0; i < 3; i++) {
+              P[n_index][i] = P[index][i]+vec2[i];
+            }         
+          P[n_index][4] = r3/Q2*P[index][4];
+          P[n_index][3] = 1/Q2+P[index][3];
+          BFS(P, n_index, (swtch+1)%4);
+        }
+      }
   }
   return;
 } 
  
 int main(int argc, char** argv) {
-  omp_set_num_threads(1);
-  
-  clock_t start = clock();
-
   int i, j;
 
   long double (*P)[5];
@@ -319,27 +313,22 @@ int main(int argc, char** argv) {
     P2[i][3] = P[i][3];
       
     for (j = i; j < pow(12, N); j++) {
-  	  if (((checker[j] == 0 && P[j][0] == P[i][0]) &&
+        if (((checker[j] == 0 && P[j][0] == P[i][0]) &&
           (P[j][1] == P[i][1] && P[j][2] == P[i][2])) &&
           (P[j][3] == P[i][3])) {
-  	      P2[i][4] += P[j][4];
-  	      checker[j] = 1;
-  	  }
-	  }
+            P2[i][4] += P[j][4];
+            checker[j] = 1;
+        }
+      }
   }
 
   for (i = 0; i < pow(12, N); i++) {
     if (P2[i][4] > 0.0) {
-  	  printf("%Lf %Lf %Lf %Lf %.11Lf\n", P2[i][0]*1e9, P2[i][1]*1e9, P2[i][2]*1e9, P2[i][3], P2[i][4]);
-  	}
+        printf("%Lf %Lf %Lf %Lf %.11Lf\n", P2[i][0]*1e9, P2[i][1]*1e9, P2[i][2]*1e9, P2[i][3], P2[i][4]);
+      }
   }
 
-  printf("\n%f\n", (clock() - start)/(CLOCKS_PER_SEC/1000.0));
-
-  free(P);
-  free(P2);
-
-  free(checker);
+  // remember to free P, P2, checker
 
   return 0;
 }
