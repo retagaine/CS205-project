@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>CS 205 Project</title>
+        <link href="https://fonts.googleapis.com/css?family=Cabin" rel="stylesheet">
+        <link rel="stylesheet" href="style.css" type="text/css">
+        <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+          tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+        });
+        </script>
+        <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    </head>
+    <body>
+        <div class="wrapper">
+            <h1>CS 205 Final Project</h1>
+            <h2>Mapping out Trajectories of Charged Defects</h2>
+            <h4>Rodrick Kuate Defo, Richard Wang</h4>
+            <h4>Professor Manju Manjunathaiah</h4>
+
+            <h3>Introduction</h3>
+            <p>The promise of the nitrogen-vacany (NV) center in diamond as a system for implementing memory storage for a quantum computer has spawned interest in defect centers in related materials such as SiC. SiC is particularly interesting as it is a polymorphic material, exhibiting about 250 known polytypes, which imbues it with a degree of freedom unavailable in diamond.</p>
+
+            <p>The three most common polytypes, 4H- and 6H-SiC and 3C-SiC, all have spin relaxation times ranging from 8 to 24 ms at 20 K (with 4H-SiC being the highest) and coherence persists up to room temperature<sup>[<a href="#ref1">1</a>]</sup>. In addition to the long spin coherence, a key feature is the ability to optically address (write in and read out) the spin states. However, much of the luminescence or emission of the defects is diverted into transitions involving scattering processes (and is not purely from the desired spin transitions) at ambient temperatures. Indeed, only about 4% of luminescence is from the desired transitions<sup>[<a href="#ref2">2</a>]</sup>.</p>
+
+            <p>A potential solution is to place the defects near cavities on resonance with the desired transitions<sup>[<a href="#ref3">3</a>]</sup>. Positioning defects, however, is a non-trivial endeavor. The defects would be created at roughly the desired location using the process of focused ion beam implantation, but this process creates a lot of damage. In order to heal the damage the sample is annealed, causing the defects to diffuse and some to be lost through conversion to other species. The purpose of this study is then to assess the probability that the negatively charged silicon vacancy defect in 4H-SiC would be optimally positioned and exist given a certain initial position and a certain number of time steps.</p>
+
+            <hr/>
+
+            <h3>Background</h3>
+            <p>Work has already been done on obtaining barriers to diffusion and the vibrational frequencies that provide the directionality and time scale for the motion<sup>[<a href="#ref4">4</a>, <a href="#ref5">5</a>]</sup>, but these studies lack a comprehensive understanding of the potential diffusion pathways and as a result do not perform the kinetic Monte Carlo simulations necessary to truly establish diffusion pathways and probabilities with the Coulomb interaction.</p>
+
+            <hr/>
+
+            <h3>Computational Methods</h3>
+            <p>There are two main stages to the calculation of the trajectory probability maps. In the first stage, density functional theory calculations will be carried out to obtain the barriers to diffusion for the various pathways and in the second stage kinetic Monte Carlo simulations will be carried out to map out trajectories. We have existing code for the second part in Matlab, which will be converted to C code. The kinetic Monte Carlo simulations will be carried out with Coulomb interaction and for 1D and 2D random walk test cases (to be compared with theoretical calculations). Without the Coulomb interaction the probability map will be calculated using a breadth first search down the tree of possible transitions (which is $O(log(N))$, where $N$ is the number of possible pathways).</p>
+
+            <p>We introduce new notation here. Let
+
+            $p_{N}(w, x, y, z)$
+
+            represent the probability of taking $w$ steps to the right, $x$ steps to the left, $y$ steps upward, and $z$ steps downward, where $w + x + y + z = N$. If some parameters are unwritten, it is assumed that they are $0$. So, $p_{N}(1, 1) = p_{N}(1, 1, 0, 0)$.
+
+            Similarly, let $P_{N}(x, y)$ be the probability of ending up in position $x$ on the horizontal axis and position $y$ on the vertical axis after $N$ steps. Again, if one of the parameters is unwritten, it is assumed to be zero.
+            </p>
+
+            <p>For the 1D case, we let $n_{1}$ be the number of steps to the right and $n_{2}$ be the number of steps to the left. The final position (with rightwards being positive) is then given by $d = n_{1} - n_{2}$ and the total number of steps is $N = n_{1} + n_{2}$. We know that the probability of taking $n_{1}$ steps to the right out of a total of $N$ steps is simply given by the number of ways to permute all the steps divided by the product of the number of ways to permute the right steps and the left steps and multiplied by the probability of taking a right step to the power of $n_{1}$ and the probability of taking a left step to the power of $n_{2}$, so:
+
+            $$p_{N}(n_{1}, n_{2}) = (\frac{1}{2})^{n_{1} + n_{2}}\frac{N!}{n_{1}!n_{2}!} = (\frac{1}{2})^{N}\frac{N!}{n_{1}!n_{2}!} = (\frac{1}{2})^{N}\frac{N!}{n_{1}!(N-n_{1})!} = (\frac{1}{2})^{N}\binom{N}{n_{1}}$$
+
+            where we have assumed the probabilities of taking left and right steps to be equal. We can uniquely express $n_{1}$ and $n_{2}$ in terms of $d$ and $N$ by solving the system of two equations, and in doing so we obtain:
+
+            $$n_{1} = \frac{N+d}{2}, n_{2} = \frac{N-d}{2}$$
+
+            Thus, the probability of ending up at a position $d$ after $N$ total steps is simply:
+
+            $$P_{N}(d) = p_{N}(n_{1}, n_{2}) = (\frac{1}{2})^{N}\binom{N}{\frac{N+d}{2}}$$
+            </p>
+
+            <p>For the 2D case, we let $n_{1}$ be the number of steps to the right, $n_{2}$ be the number of steps to the left, $n_{3}$ be the number of steps upwards, and $n_{4}$ to be the number of steps downwards. Then:
+
+            $$p_{N}(n_{1}, n_{2}, n_{3}, n_{4}) = (\frac{1}{4})^{N}\frac{N!}{n_{1}!n_{2}!n_{3}!n_{4}!}$$
+
+            assuming that the probability of taking a step in any direction is the same. If we let $d_{x} = n_{1} - n_{2}$ be our final horizontal position and $d_{y} = n_{3} - n_{4}$ be the final vertical position, then we can solve for $n_{1}$, $n_{2}$, and $n_{3}$ in terms of $d_{x}, d_{y}, N$, and $n_{4}$:
+
+            $$n_{1} = \frac{N + d_{x} - d_{y} - 2n_{4}}{2}$$
+
+            $$n_{2} = \frac{N - d_{x} - d_{y} - 2n_{4}}{2}$$
+
+            $$n_{3} = d_{y} + n_{4}$$
+
+            We note that $n_{4}$ can range from $0$ to $\frac{N-d_{x}-d_{y}}{2}$, so:
+
+            $$P_{N}(d_{x}, d_{y}) = \sum\limits_{n_{4} = 0}^{\frac{N-d_{x}-d_{y}}{2}} (\frac{1}{4})^{N} \frac{N!}{(\frac{N+d_{x}-d_{y}-2n_{4}}{2})!(\frac{N-d_{x}-d_{y}-2n_{4}}{2})!(d_{y}+n_{4})!n_{4}!}$$
+
+            $$= (\frac{1}{4})^{N} \frac{\Gamma(N+1) _{2}\tilde{F}_{1}(\frac{d_{y}-d_{x}-N}{2}, \frac{d_{x}+d_{y}-N}{2}; 1+d_{y}; 1)}{\Gamma(\frac{N+2-d_{x}-d_{y}}{2})\Gamma(\frac{N+2+d_{x}-d_{y}}{2})}$$
+
+            where $\Gamma$ is the gamma function and $_{2}\tilde{F}_{1}$ is the regularized version of the hypergeometric function $_{2}F_{1}$.
+            </p>
+
+            <hr/>
+
+            <h3>References</h3>
+            <ul>
+                <li><b><a name="ref1">[1]</a></b> A. L. Falk, B. B. Buckley, G. Calusine, W. F. Koehl, V. V. Dobrovitski, A. Politi, C. A. Zorman, P. X. L. Feng, and D. D. Awschalom, "Polytype control of spin qubits in silicon carbide," <i>Nature Communications</i>, vol. 4, p. 1819, 05 2013.</li>
+                <li><b><a name="ref2">[2]</a></b> I. Aharonovich, S. Castelletto, D. A. Simpson, C.-H. Su, A. D. Greentree, and S. Prawer, "Diamond-based single-photon emitters," <i>Reports on Progress in Physics</i>, vol. 74, no. 7, p. 076501, 2011.</li>
+                <li><b><a name="ref3">[3]</a></b> D. O. Bracher, X. Zhang, and E. L. Hu, "Selective purcell enhancement of two closely linked zero-phonon transitions of a silicon carbide color center," arXiv:1609.03918, 2016.</li>
+                <li><b><a name="ref4">[4]</a></b> E. Rauls, T. Frauenheim, A. Gali, and P. Deák, "Theoretical study of vacancy diffusion and vacancy-assisted clustering of antisites in sic," <i>Phys. Rev. B</i>, vol. 68, p. 155208, Oct 2003.</li>
+                <li><b><a name="ref5">[5]</a></b> X. Wang, M. Zhao, H. Bu, H. Zhang, X. He, and A. Wang, "Formation and annealing behaviors of qubit centers in 4h-sic from first principles," <i>Journal of Applied Physics</i>, vol. 114, no. 19, p. 194305, 2013.</li>
+            </ul>
+        </div>
+    </body>
+</html>
