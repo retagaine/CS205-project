@@ -56,7 +56,7 @@ long double rotm2[3][3] = {
 
 
 /* Calculate potential */
-long double get_pot(long double x[3], long double locs[N][IT][3],
+long double get_pot(long double x[3], long double locs[N][3][IT],
                     long double chg[IT], int it, int h, int y) { 
   /* define elementary charge (e), dielectric constant (er), and permittivity
      of free space (e0) */
@@ -72,9 +72,9 @@ long double get_pot(long double x[3], long double locs[N][IT][3],
 
   for (int i = 0; i < IT; i++) {
     if (i != h) {
-	  inv[i] = sqrt(pow((x[0] - locs[y][i][0]), 2)
-                + pow((x[2] - locs[y][i][1]), 2)
-                + pow((x[3] - locs[y][i][2]), 2)) + eps;
+	  inv[i] = sqrt(pow((x[0] - locs[y][0][i]), 2)
+                + pow((x[2] - locs[y][1][i]), 2)
+                + pow((x[3] - locs[y][2][i]), 2)) + eps;
 	  }
   }
   for(int i = 0; i < IT-1; i++) {
@@ -187,7 +187,7 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3]) {
   int m;
   /* Initialize the array to store positions (llocs), which level - hexagonal
   % or cubic we are on - (k) and charge state (chg) */ 
-  long double llocs[N][IT][3] = {0.0};
+  long double llocs[N][3][IT] = {0.0};
   double tt = 0;
   double t; 
   int itt = IT;
@@ -211,8 +211,8 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3]) {
       		mat_pow(rotmf,rotm1,ij-1);
       		mat_vec_mul(vec2,vec1,rotmf);
 		      for (int i = 0; i < 3; i++) {
-    		    locs[i] = llocs[y-1][h][i]+vec2[i];
-    		    locs0[i] = llocs[y-1][h][i];
+    		    locs[i] = llocs[y-1][i][h]+vec2[i];
+    		    locs0[i] = llocs[y-1][i][h];
     		  }		 
 		      R[ij] = R[ij-1]+r1*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
 	      }
@@ -224,8 +224,8 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3]) {
       		mat_mul(mf,cell2,rotmf);
       		mat_vec_mul(vec2,vec1,mf);
 		      for (int i = 0; i<3; i++) {
-    		    locs[i] = llocs[y-1][h][i]+vec2[i];
-    		    locs0[i] = llocs[y-1][h][i];
+    		    locs[i] = llocs[y-1][i][h]+vec2[i];
+    		    locs0[i] = llocs[y-1][i][h];
     		  }
 		      R[ij] = R[ij-1]+r3*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
 	      }
@@ -237,8 +237,8 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3]) {
       		mat_mul(mf,cell2,rotmf);
       		mat_vec_mul(vec2,vec1,mf);
       		for (int i = 0; i < 3; i++) {
-    		    locs[i] = llocs[y-1][h][i]+vec2[i];
-    		    locs0[i] = llocs[y-1][h][i];
+    		    locs[i] = llocs[y-1][i][h]+vec2[i];
+    		    locs0[i] = llocs[y-1][i][h];
     		  }
 		      R[ij] = R[ij-1]+r4*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
 	      }
@@ -254,8 +254,8 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3]) {
       		mat_pow(rotmf,rotm1,ij-1);
       		mat_vec_mul(vec2,vec1,rotmf);
       		for (int i = 0; i<3; i++) {
-    		    locs[i] = llocs[y-1][h][i]+vec2[i];
-    		    locs0[i] = llocs[y-1][h][i];
+    		    locs[i] = llocs[y-1][i][h]+vec2[i];
+    		    locs0[i] = llocs[y-1][i][h];
     		  }
 		      R[ij] = R[ij-1]+r2*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
 	      }
@@ -267,8 +267,8 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3]) {
       		mat_mul(mf,cell2,rotmf);
       		mat_vec_mul(vec2,vec1,mf);
       		for (int i = 0; i < 3; i++) {
-    		    locs[i] = llocs[y-1][h][i]+vec2[i];
-    		    locs0[i] = llocs[y-1][h][i];
+    		    locs[i] = llocs[y-1][i][h]+vec2[i];
+    		    locs0[i] = llocs[y-1][i][h];
     		  }
         	R[ij] = R[ij-1]+r4*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
 	      }
@@ -280,8 +280,8 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3]) {
           mat_mul(mf,cell2,rotmf);
           mat_vec_mul(vec2,vec1,mf);
           for (int i = 0; i < 3; i++) {
-    		    locs[i] = llocs[y-1][h][i]+vec2[i];
-    		    locs0[i] = llocs[y-1][h][i];
+    		    locs[i] = llocs[y-1][i][h]+vec2[i];
+    		    locs0[i] = llocs[y-1][i][h];
     		  }
       		R[ij] = R[ij-1]+r3*exp(-(get_pot(locs,llocs,chg,IT,h,y)-get_pot(locs0,llocs,chg,IT,h,y))/kb/T);
 	      }
@@ -319,7 +319,7 @@ void kMC(long double cell2[3][3], long double spos_Si[6][3]) {
         mat_pow(rotmf,rotm1,m);
         mat_vec_mul(vec2,vec1,rotmf);
         for (int i = 0; i < 3; i++) {
-		      llocs[y][h][i] = llocs[y-1][h][i]+vec2[i];
+		      llocs[y][i][h] = llocs[y-1][i][h]+vec2[i];
 	      }
 	    }
       else if (m < 9) {

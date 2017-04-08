@@ -210,7 +210,7 @@ void BFS(long double P[P_SIZE][5], long int index, int swtch) {
   int n_index;
 
   if (swtch == 0 || swtch == 2) {
-#pragma omp parallel shared(ipvec,opvec1,opvec2, P) private(ij)
+    #pragma omp parallel shared(vec1, P) private(ij)
     {
       #pragma omp parallel for schedule(static)
       for (ij = 1; ij < 13; ij++) {
