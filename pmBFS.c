@@ -141,12 +141,19 @@ void mat_vec_mul(long double prod[3], long double vec[3], long double mat[3][3])
 }
 
 /* Run simulation */
+// why use the pointer *ii here?
 void BFS(long double A[P_SIZE][P_SIZE][5], long double P[P_SIZE][6], long int *ii) {
-  long int lower,upper,i,j;
+  long int lower, upper, i, j;
   // #pragma omp parallel shared(A,P) private(i)
   // {
   //   #pragma omp parallel for schedule(static)
     for (i = 0; i < P_SIZE; i++) {
+      /*
+      Why use this ternary operation here? At any point where
+      i >= (P_SIZE - 1)/12, the loop breaks out and moves on...
+      so it looks like we are doing around 11*P_SIZE/12 extraneous
+      runs through the loop.
+      */
       lower = ((12*i+1) < P_SIZE) ? (12*i+1) : P_SIZE;
       if (lower == P_SIZE) {
 	      break;
@@ -163,6 +170,7 @@ void BFS(long double A[P_SIZE][P_SIZE][5], long double P[P_SIZE][6], long int *i
   	      P[j][1] = A[i][j][1]+P[i][1];
   	      P[j][2] = A[i][j][2]+P[i][2];
   	      P[j][3] = A[i][j][3]+P[i][3];
+          // should this be * and not +?
   	      P[j][4] = A[i][j][4]*P[i][4];
   	    }
   	  }
@@ -180,8 +188,8 @@ int main(int argc, char** argv) {
   long double r3 = v*exp(-E_1_4/kb/T);
   long double r4 = v*exp(-E_3_4/kb/T);
   long double r5 = v*exp(-E_c/kb/T);
-  long double Q1,Q2;
-  long int i, j,k,ii;
+  long double Q1, Q2;
+  long int i, j, k, ii;
 
   long double (*P)[6];
   long double (*P2)[5];
@@ -227,11 +235,11 @@ int main(int argc, char** argv) {
       for (j = 0; j < 3; j++) {
         vec1[j] = spos_Si[k][j] - spos_Si[k+1][j];
       }
-  	  mat_pow(rotmf,rotm2,i);
-  	  mat_mul(mf,cell2_duplicate,rotmf);
-  	  mat_vec_mul(vec2,vec1,mf);
+  	  mat_pow(rotmf, rotm2, i);
+  	  mat_mul(mf, cell2_duplicate, rotmf);
+  	  mat_vec_mul(vec2, vec1, mf);
 	    for (j = 0; j < 3; j++) {
-	      opvec1_duplicate[k][i][j] = vec2[j];
+	      opvec1[k][i][j] = vec2[j];
 	    }
     }
   }
@@ -240,27 +248,18 @@ int main(int argc, char** argv) {
       for (j = 0; j < 3; j++) {
         vec1[j] = spos_Si[k+2][j] - spos_Si[k+1][j];
       }
-  	  mat_pow(rotmf,rotm2,i);
-  	  mat_mul(mf,cell2_duplicate,rotmf);
-  	  mat_vec_mul(vec2,vec1,mf);
+  	  mat_pow(rotmf, rotm2, i);
+  	  mat_mul(mf, cell2_duplicate, rotmf);
+  	  mat_vec_mul(vec2, vec1, mf);
   	  for (j = 0; j < 3; j++) {
-        opvec2_duplicate[k][i][j] = vec2[j];
+        opvec2[k][i][j] = vec2[j];
       }
     }
   }
+
   for (i = 0; i < 3; i++) {
     memcpy(&cell2[i], &cell2_duplicate[i], sizeof(cell2_duplicate[0]));
   }
-  for (i = 0; i<6; i++) {
-    memcpy(&ipvec[i], &ipvec_duplicate[i], sizeof(ipvec_duplicate[0]));
-  }
-  for (k = 0; k < 4; k++) {
-    for (i = 0; i < 3; i++) {
-      memcpy(&opvec1[k][i], &opvec1_duplicate[k][i], sizeof(opvec1_duplicate[0][0]));
-      memcpy(&opvec2[k][i], &opvec2_duplicate[k][i], sizeof(opvec2_duplicate[0][0]));
-    }
-  }
-
 
   // initializes all elements to 0
   for (i = 0; i < P_SIZE; i++) {
@@ -336,17 +335,21 @@ int main(int argc, char** argv) {
       }
     }
   }
-  P[0][5] = 1.0;
+
   P[0][1] = 0.0;
   P[0][2] = 0.0;
   P[0][3] = 0.0;
   P[0][4] = 1.0;
+  P[0][5] = 1.0;
   ii = 0;
+  
   for (i = 0; i < N; i++) {
     BFS(A, P, &ii);
   }
+  
   printf("%ld\n",ii);
-  n_index = (N)%2;
+  n_index = N % 2;
+  
   for (i = 0; i < P_SIZE; i++) {
     P2[i][0] = P[i][0];
     P2[i][1] = P[i][1];
