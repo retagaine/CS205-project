@@ -34,19 +34,18 @@ h3 {
     margin: 100px 250px 0 250px;
 }
 
-.caption {
-    width: 400px;
-    float: left;
-}
-
-.centered {
-    width: 800px;
-    height: inherit;
-    margin: auto;
+.figure-wrapper {
+    width: 100%;
     text-align: center;
 }
 
-.figure-wrapper {
+.caption {
+    width: 100%;
+    float: left;
     display: inline-block;
-    margin-left: 62px;
+}
+
+.caption > p {
+    width: 400px;
+    display: inline-block;
 }
